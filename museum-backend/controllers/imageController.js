@@ -1,6 +1,7 @@
 const multer = require("multer");
 const QRCode = require("qrcode");
 const fs = require("fs");
+const sharp = require("sharp");
 const path = require("path");
 
 // Set up Multer for file uploads
@@ -15,16 +16,23 @@ const uploadImage = upload.single("image");
 const saveImage = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const { filename, originalname, size } = req.file;
+  const { filename, originalname, path: filePath, size } = req.file;
   const { description } = req.body;
   const db = req.db;
 
   try {
+    const { width, height } = await sharp(filePath).metadata();
+
     const result = await db.collection("images").insertOne({
-      filename,
-      originalName: originalname,
-      size,
-      description: description || "",
+      photos: [
+        {
+          filename,
+          originalName: originalname,
+          size,
+          description: description || "",
+          dimensions: { width, height },
+        },
+      ],
       uploadedAt: new Date(),
     });
 
@@ -62,7 +70,7 @@ const generateQRCode = async (req, res) => {
     }
 
     // Generate the QR code data URL
-    const qrCodeData = `http://localhost:5000/uploads/${image.filename}`;
+    const qrCodeData = `http://localhost:5000/uploads/${image.photos[0].filename}`;
 
     // Generate the QR code
     const qrCode = await QRCode.toDataURL(qrCodeData);

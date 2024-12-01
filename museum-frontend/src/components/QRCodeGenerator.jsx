@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const QRCodeGenerator = ({ imageId }) => {
+const QRCodeGenerator = ({ imageId, onClose }) => {
   const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,20 +52,25 @@ const QRCodeGenerator = ({ imageId }) => {
   };
 
   return (
-    <div className="mt-8 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-          Generated QR Code
-        </h3>
-        <div className="flex flex-col items-center">
-          <img
-            src={qrCode}
-            alt="QR Code"
-            className="w-48 h-48 object-contain mb-4"
-          />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-sm w-full">
+        <img
+          src={qrCode}
+          alt="QR Code"
+          className="w-64 h-64 object-contain mb-6 mx-auto" // Increased size to w-64 h-64
+        />
+        <div className="flex justify-center gap-4">
+          {" "}
+          {/* Aligned buttons horizontally */}
+          <button
+            onClick={onClose}
+            className="w-full flex justify-center bg-blue-500 text-gray-100 p-4 rounded-full tracking-wide font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-600 shadow-lg cursor-pointer transition ease-in duration-300"
+          >
+            Close
+          </button>
           <button
             onClick={handlePrint}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105"
+            className="w-full flex justify-center bg-blue-500 text-gray-100 p-4 rounded-full tracking-wide font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-600 shadow-lg cursor-pointer transition ease-in duration-300"
           >
             Print QR Code
           </button>

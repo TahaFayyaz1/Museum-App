@@ -43,15 +43,15 @@ const Home = () => {
               className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center"
             >
               <img
-                src={`http://localhost:5000/uploads/${image.filename}`}
-                alt={image.originalName}
+                src={`http://localhost:5000/uploads/${image.photos[0].filename}`}
+                alt={image.photos[0].originalName}
                 className="rounded-lg w-full h-48 object-cover mb-4"
               />
               <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                {image.originalName}
+                {image.photos[0].originalName}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {image.description || "No description available"}
+                {image.photos[0].description || "No description available"}
               </p>
             </div>
           ))}
