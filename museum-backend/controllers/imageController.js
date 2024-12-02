@@ -1,30 +1,29 @@
-const multer = require("multer");
+const multer = require("multer"); // handles file uploads
 const QRCode = require("qrcode");
-const fs = require("fs");
-const sharp = require("sharp");
-const path = require("path");
-const { Client } = require("@elastic/elasticsearch");
-const { ObjectId } = require("mongodb");
-
-// Set up Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const upload = multer({ storage });
+const sharp = require("sharp"); // used in figuring out the dimensions of the image
+const { Client } = require("@elastic/elasticsearch"); // interacting with Elasticsearch cluster
+const { ObjectId } = require("mongodb"); // querying database
 
 require("dotenv").config();
-// Initialize Elasticsearch client
+
+// Initializes Elasticsearch client
 const esClient = new Client({
   node: "http://localhost:9200",
   auth: {
     username: process.env.ELASTIC_USERNAME,
     password: process.env.ELASTIC_PASSWORD,
   },
-}); // Replace with your Elasticsearch URL
+});
 
-// Upload Image
-const uploadImage = upload.single("image");
+// configures multer to define where and how uploaded files will be stored
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname), // to avoid filename collision date is added
+});
+const upload = multer({ storage });
+
+const uploadImage = upload.single("image"); // multer parses the incoming request and looks for a file in "image" and stores it
+
 const saveImage = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
@@ -33,8 +32,9 @@ const saveImage = async (req, res) => {
   const db = req.db;
 
   try {
-    const { width, height } = await sharp(filePath).metadata();
+    const { width, height } = await sharp(filePath).metadata(); // extracts the dimensions of the image
 
+    // saves to mongo db using the following structure
     const result = await db.collection("images").insertOne({
       photos: [
         {
@@ -52,7 +52,7 @@ const saveImage = async (req, res) => {
       .collection("images")
       .findOne({ _id: result.insertedId });
 
-    // Index the document in Elasticsearch
+    // Indexes the image data in Elasticsearch for enabling search functionality
     await esClient.index({
       index: "images",
       id: result.insertedId.toString(),
@@ -73,42 +73,37 @@ const saveImage = async (req, res) => {
   }
 };
 
-// Generate QR Code
+// Generates a QR Code for each image
 const generateQRCode = async (req, res) => {
   const { id } = req.params;
   const db = req.db;
 
   try {
-    // Validate the provided ID
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid image ID" });
+      return res.status(400).json({ error: "Invalid image ID" }); // validates the id
     }
 
-    // Fetch the image from the database to ensure it exists
-    const image = await db
-      .collection("images")
-      .findOne({ _id: new ObjectId(id) });
+    const image = await db.collection("images").findOne({ _id: ObjectId }); // finds the image by the id in the db
 
     if (!image) {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    // Generate the link for the QR code
+    // Generates the link for the QR code
     const link = `http://localhost:3000/item/${id}`;
 
-    // Generate a QR code containing the link
+    // Generates a QR code containing the link
     const qrCode = await QRCode.toDataURL(link);
 
     if (!qrCode) {
       return res.status(500).json({ error: "Failed to generate QR code" });
     }
 
-    // Save the QR code data (optional)
+    // Saves the QR code data
     await db
       .collection("images")
       .updateOne({ _id: new ObjectId(id) }, { $set: { qrCodeData: qrCode } });
 
-    // Respond with the QR code
     res.status(200).json({ qrCode });
   } catch (err) {
     console.error("Error generating QR code:", err);
@@ -118,7 +113,6 @@ const generateQRCode = async (req, res) => {
   }
 };
 
-// Get all images
 const getAllImages = async (req, res) => {
   const db = req.db;
 
@@ -164,12 +158,11 @@ const searchImages = async (req, res) => {
 };
 
 // Get a specific image by ID
-const getImageById = async (req, res) => {
-  const { id } = req.params; // Get the image ID from the request parameters
-  const db = req.db; // Get the database instance from the request
+const getImage = async (req, res) => {
+  const { id } = req.params;
+  const db = req.db;
 
   try {
-    // Validate the provided ID
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid image ID" });
     }
@@ -177,12 +170,11 @@ const getImageById = async (req, res) => {
     // Query the database for the image
     const image = await db
       .collection("images")
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: ObjectId.createFromHexString(id) });
     if (!image) {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    // Return the image data
     res.status(200).json(image);
   } catch (err) {
     console.error("Error fetching image:", err);
@@ -198,5 +190,5 @@ module.exports = {
   generateQRCode,
   getAllImages,
   searchImages,
-  getImageById,
+  getImage,
 };

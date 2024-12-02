@@ -2,30 +2,28 @@ import React, { useState } from "react";
 import axios from "axios";
 import QRCodeGenerator from "./QRCodeGenerator";
 
-const FileUpload = () => {
+const ImageUpload = () => {
   const [file, setFile] = useState(null);
   const [description, setDescription] = useState("");
   const [preview, setPreview] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [imageId, setImageId] = useState(null);
   const [qrCodeButton, setQrCodeButton] = useState(false);
-  const [dragging, setDragging] = useState(false); // State to track drag events
+  const [dragging, setDragging] = useState(false);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    validateAndSetFile(selectedFile);
-  };
-
+  // validates and sets the image either through upload or drag or drop
   const validateAndSetFile = (selectedFile) => {
-    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
-      setUploadStatus("File is too large. Please select a file less than 5MB.");
+    // checks if the selected file is a png file
+    if (selectedFile && selectedFile.type !== "image/png") {
+      setUploadStatus("Only PNG files are allowed.");
       setFile(null);
       setPreview(null);
       return;
     }
 
-    if (selectedFile && selectedFile.type !== "image/png") {
-      setUploadStatus("Only PNG files are allowed.");
+    // checks if the selected file is less than 5gb
+    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
+      setUploadStatus("File is too large. Please select a file less than 5MB.");
       setFile(null);
       setPreview(null);
       return;
@@ -36,7 +34,8 @@ const FileUpload = () => {
     setUploadStatus("");
   };
 
-  const handleFileUpload = async (e) => {
+  // uploads the image to the appropriate endpoint
+  const handleImageUpload = async (e) => {
     e.preventDefault();
     if (!file) {
       setUploadStatus("Please select a file to upload.");
@@ -69,29 +68,33 @@ const FileUpload = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    validateAndSetFile(selectedFile);
+  };
+
+  //next couple of functions are for drag and drop feature
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragging(true);
+  };
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragging(false);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    validateAndSetFile(droppedFile);
+  };
+
   const handleQrCodeButton = () => {
     setQrCodeButton(true);
   };
 
   const closeQrCodeButton = () => {
     setQrCodeButton(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    validateAndSetFile(droppedFile);
   };
 
   return (
@@ -103,7 +106,7 @@ const FileUpload = () => {
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
               Image Upload
             </h1>
-            <form onSubmit={handleFileUpload} className="mt-8 space-y-6">
+            <form onSubmit={handleImageUpload} className="mt-8 space-y-6">
               <div
                 className={`flex items-center justify-center w-full border-4 border-dashed p-10 h-60 rounded-lg ${
                   dragging
@@ -162,7 +165,6 @@ const FileUpload = () => {
               </p>
             )}
 
-            {/* Only show the Generate QR Code button if upload is successful */}
             {uploadStatus === "File uploaded successfully!" && (
               <button
                 onClick={handleQrCodeButton}
@@ -181,4 +183,4 @@ const FileUpload = () => {
   );
 };
 
-export default FileUpload;
+export default ImageUpload;

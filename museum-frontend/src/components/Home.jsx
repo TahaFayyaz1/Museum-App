@@ -13,7 +13,6 @@ const Home = () => {
         if (!response.ok) throw new Error("Failed to fetch images");
 
         const data = await response.json();
-        console.log(data);
         setImages(data);
       } catch (error) {
         console.error("Error fetching images:", error);

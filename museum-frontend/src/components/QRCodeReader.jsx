@@ -12,7 +12,7 @@ const QrScanner = () => {
       setData(data.text);
       setScanned(true);
 
-      const urlPattern = /^https?:\/\/localhost:3000\/item\/([a-zA-Z0-9]+)$/;
+      const urlPattern = /^http?:\/\/localhost:3000\/item\/([a-zA-Z0-9]+)$/; // checks if the url match http://localhost:3000/item/:id, if so then it redirects there
       const match = data.text.match(urlPattern);
 
       if (match) {

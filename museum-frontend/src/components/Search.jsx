@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const ImageSearch = () => {
-  const [query, setQuery] = useState(""); // State for search query
-  const [results, setResults] = useState([]); // State for search results
-  const [error, setError] = useState(""); // State for error messages
-  const [searchPerformed, setSearchPerformed] = useState(false); // State to track if search was performed
+const Search = () => {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState("");
+  const [searchPerformed, setSearchPerformed] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
     try {
       const response = await fetch("http://localhost:5000/api/images/search", {
@@ -23,11 +25,11 @@ const ImageSearch = () => {
       }
 
       const data = await response.json();
-      setResults(data); // Update results with the response data
-      setError(""); // Clear any previous errors
-      setSearchPerformed(true); // Mark that a search has been made
+      setResults(data);
+      setError("");
+      setSearchPerformed(true);
     } catch (err) {
-      setError(err.message); // Display the error message
+      setError(err.message);
     }
   };
 
@@ -75,6 +77,7 @@ const ImageSearch = () => {
                   <div
                     key={result.id}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center transition-transform transform hover:scale-105"
+                    onClick={() => navigate(`/item/${result.id}`)}
                   >
                     <img
                       src={`http://localhost:5000/uploads/${result.filename}`} // Construct image URL
@@ -98,4 +101,4 @@ const ImageSearch = () => {
   );
 };
 
-export default ImageSearch;
+export default Search;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const ItemDetail = () => {
-  const { id } = useParams(); // Get the id from URL params
+  const { id } = useParams();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,9 +10,7 @@ const ItemDetail = () => {
   useEffect(() => {
     const fetchItemDetails = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/images/${id}`
-        );
+        const response = await fetch(`http://localhost:5000/api/images/${id}`);
         if (!response.ok) throw new Error("Failed to fetch item details");
 
         const data = await response.json();
@@ -72,7 +70,7 @@ const ItemDetail = () => {
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
           Uploaded on:{" "}
-          {new Date(item.createdAt).toLocaleDateString() || "Unknown"}
+          {new Date(item.uploadedAt).toLocaleDateString() || "Unknown"}
         </p>
       </div>
     </div>

@@ -7,7 +7,6 @@ function NavBar({ darkMode, toggleDarkMode }) {
       className={`bg-gray-100 dark:bg-gray-900 py-4 border-b border-gray-300 dark:border-gray-700`}
     >
       <nav className="flex justify-between items-center max-w-6xl mx-auto px-4">
-        {/* Links */}
         <div className="space-x-4">
           <Link
             to="/"
@@ -35,7 +34,6 @@ function NavBar({ darkMode, toggleDarkMode }) {
           </Link>
         </div>
 
-        {/* Dark Mode Toggle Button */}
         <button
           onClick={toggleDarkMode}
           className="ml-4 rounded-full bg-gray-200 p-2 text-gray-600 transition-colors duration-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"

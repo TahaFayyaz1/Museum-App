@@ -6,13 +6,12 @@ const QRCodeGenerator = ({ imageId, onClose }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch the QR code using axios
     const fetchQRCode = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5000/api/images/qrcode/${imageId}`
         );
-        setQrCode(response.data.qrCode); // Assuming the response contains the qrCode field
+        setQrCode(response.data.qrCode);
       } catch (error) {
         console.error("Error fetching QR code:", error);
       } finally {
@@ -33,6 +32,7 @@ const QRCodeGenerator = ({ imageId, onClose }) => {
 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
+
     printWindow.document.write(`
       <html>
         <head>
@@ -48,7 +48,11 @@ const QRCodeGenerator = ({ imageId, onClose }) => {
       </html>
     `);
     printWindow.document.close();
-    printWindow.print();
+
+    // Print is delayed to ensure the content is fully rendered
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
   };
 
   return (
@@ -57,11 +61,10 @@ const QRCodeGenerator = ({ imageId, onClose }) => {
         <img
           src={qrCode}
           alt="QR Code"
-          className="w-64 h-64 object-contain mb-6 mx-auto" // Increased size to w-64 h-64
+          className="w-64 h-64 object-contain mb-6 mx-auto"
         />
         <div className="flex justify-center gap-4">
           {" "}
-          {/* Aligned buttons horizontally */}
           <button
             onClick={onClose}
             className="w-full flex justify-center bg-blue-500 text-gray-100 p-4 rounded-full tracking-wide font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-600 shadow-lg cursor-pointer transition ease-in duration-300"

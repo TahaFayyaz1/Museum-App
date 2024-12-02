@@ -4,9 +4,9 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./components/Root";
-import ImageUpload from "./components/ImageUpload";
 import Home from "./components/Home";
-import ImageSearch from "./components/ImageSearch";
+import ImageUpload from "./components/ImageUpload";
+import Search from "./components/Search";
 import QrScanner from "./components/QRCodeReader";
 import ItemDetail from "./components/Item";
 import NotFound from "./components/NotFound";
@@ -30,7 +30,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/search",
-        element: <ImageSearch />,
+        element: <Search />,
       },
       {
         path: "/scan",
