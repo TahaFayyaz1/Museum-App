@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./components/Root";
 import ImageUpload from "./components/ImageUpload";
 import Home from "./components/Home";
+import ImageSearch from "./components/ImageSearch";
 
 const router = createBrowserRouter([
   {
@@ -17,8 +18,12 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/image_upload",
+        path: "/upload",
         element: <ImageUpload />,
+      },
+      {
+        path: "/search",
+        element: <ImageSearch />,
       },
     ],
   },

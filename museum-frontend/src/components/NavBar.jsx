@@ -11,15 +11,21 @@ function NavBar({ darkMode, toggleDarkMode }) {
         <div className="space-x-4">
           <Link
             to="/"
-            className="text-lg text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400"
+            className="text-lg font-medium text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
           >
             Home
           </Link>
           <Link
-            to="/image_upload"
-            className="text-lg text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400"
+            to="/upload"
+            className="text-lg font-medium text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
           >
             Add New Item
+          </Link>
+          <Link
+            to="/search"
+            className="text-lg font-medium text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
+          >
+            Search
           </Link>
         </div>
 

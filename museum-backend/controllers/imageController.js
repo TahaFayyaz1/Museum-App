@@ -3,6 +3,8 @@ const QRCode = require("qrcode");
 const fs = require("fs");
 const sharp = require("sharp");
 const path = require("path");
+const { Client } = require("@elastic/elasticsearch");
+const { ObjectId } = require("mongodb");
 
 // Set up Multer for file uploads
 const storage = multer.diskStorage({
@@ -10,6 +12,16 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
+
+require("dotenv").config();
+// Initialize Elasticsearch client
+const esClient = new Client({
+  node: "http://localhost:9200",
+  auth: {
+    username: process.env.ELASTIC_USERNAME,
+    password: process.env.ELASTIC_PASSWORD,
+  },
+}); // Replace with your Elasticsearch URL
 
 // Upload Image
 const uploadImage = upload.single("image");
@@ -36,12 +48,24 @@ const saveImage = async (req, res) => {
       uploadedAt: new Date(),
     });
 
-    // Use `insertedId` to fetch the newly inserted document
     const insertedImage = await db
       .collection("images")
       .findOne({ _id: result.insertedId });
 
-    res.status(201).json(insertedImage); // Return the inserted document
+    // Index the document in Elasticsearch
+    await esClient.index({
+      index: "images",
+      id: result.insertedId.toString(),
+      body: {
+        filename,
+        originalName: originalname,
+        description: description || "",
+        dimensions: { width, height },
+        uploadedAt: new Date(),
+      },
+    });
+
+    res.status(201).json(insertedImage);
   } catch (err) {
     res
       .status(500)
@@ -50,14 +74,11 @@ const saveImage = async (req, res) => {
 };
 
 // Generate QR Code
-const { ObjectId } = require("mongodb"); // Import ObjectId
-
 const generateQRCode = async (req, res) => {
   const { id } = req.params;
   const db = req.db;
 
   try {
-    // Ensure the id is a valid ObjectId
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid image ID" });
     }
@@ -69,36 +90,32 @@ const generateQRCode = async (req, res) => {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    // Generate the QR code data URL
     const qrCodeData = `http://localhost:5000/uploads/${image.photos[0].filename}`;
-
-    // Generate the QR code
     const qrCode = await QRCode.toDataURL(qrCodeData);
     if (!qrCode) {
       return res.status(500).json({ error: "Failed to generate QR code" });
     }
 
-    // Update the database with the generated QR code data
     await db
       .collection("images")
       .updateOne({ _id: new ObjectId(id) }, { $set: { qrCodeData } });
 
-    // Return the generated QR code
     res.status(200).json({ qrCode });
   } catch (err) {
-    console.error("Error generating QR code:", err); // Log the error for debugging
+    console.error("Error generating QR code:", err);
     res
       .status(500)
       .json({ error: "Failed to generate QR code", details: err.message });
   }
 };
 
+// Get all images
 const getAllImages = async (req, res) => {
   const db = req.db;
 
   try {
     const images = await db.collection("images").find({}).toArray();
-    res.status(200).json(images); // Return all images
+    res.status(200).json(images);
   } catch (err) {
     console.error("Error fetching images:", err);
     res
@@ -107,4 +124,40 @@ const getAllImages = async (req, res) => {
   }
 };
 
-module.exports = { uploadImage, saveImage, generateQRCode, getAllImages };
+// Search images by description
+const searchImages = async (req, res) => {
+  const { query } = req.body;
+
+  try {
+    const result = await esClient.search({
+      index: "images",
+      body: {
+        query: {
+          match: {
+            description: query,
+          },
+        },
+      },
+    });
+
+    const hits = result.hits.hits.map((hit) => ({
+      id: hit._id,
+      ...hit._source,
+    }));
+
+    res.status(200).json(hits);
+  } catch (err) {
+    console.error("Error searching images:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to search images", details: err.message });
+  }
+};
+
+module.exports = {
+  uploadImage,
+  saveImage,
+  generateQRCode,
+  getAllImages,
+  searchImages,
+};

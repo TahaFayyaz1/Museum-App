@@ -23,11 +23,23 @@ const Home = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading images...</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-lg text-gray-700 dark:text-gray-300">
+          Loading images...
+        </p>
+      </div>
+    );
   }
 
   if (images.length === 0) {
-    return <p>No images found.</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-lg text-gray-700 dark:text-gray-300">
+          No images found.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -40,7 +52,7 @@ const Home = () => {
           {images.map((image) => (
             <div
               key={image._id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center transition-transform transform hover:scale-105"
             >
               <img
                 src={`http://localhost:5000/uploads/${image.photos[0].filename}`}
