@@ -7,6 +7,9 @@ import Root from "./components/Root";
 import ImageUpload from "./components/ImageUpload";
 import Home from "./components/Home";
 import ImageSearch from "./components/ImageSearch";
+import QrScanner from "./components/QRCodeReader";
+import ItemDetail from "./components/Item";
+import NotFound from "./components/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -18,12 +21,24 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
+        path: "/item/:id",
+        element: <ItemDetail />,
+      },
+      {
         path: "/upload",
         element: <ImageUpload />,
       },
       {
         path: "/search",
         element: <ImageSearch />,
+      },
+      {
+        path: "/scan",
+        element: <QrScanner />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

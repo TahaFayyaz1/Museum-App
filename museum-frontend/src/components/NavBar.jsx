@@ -27,6 +27,12 @@ function NavBar({ darkMode, toggleDarkMode }) {
           >
             Search
           </Link>
+          <Link
+            to="/scan"
+            className="text-lg font-medium text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
+          >
+            Scan
+          </Link>
         </div>
 
         {/* Dark Mode Toggle Button */}

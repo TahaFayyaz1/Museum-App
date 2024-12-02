@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -11,6 +13,7 @@ const Home = () => {
         if (!response.ok) throw new Error("Failed to fetch images");
 
         const data = await response.json();
+        console.log(data);
         setImages(data);
       } catch (error) {
         console.error("Error fetching images:", error);
@@ -46,13 +49,14 @@ const Home = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-6 flex flex-col items-center">
       <div className="max-w-6xl w-full px-4">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
-          Image Gallery
+          Museum Items
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((image) => (
             <div
               key={image._id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center transition-transform transform hover:scale-105"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center transition-transform transform hover:scale-105 cursor-pointer"
+              onClick={() => navigate(`/item/${image._id}`)} // Navigate on click
             >
               <img
                 src={`http://localhost:5000/uploads/${image.photos[0].filename}`}

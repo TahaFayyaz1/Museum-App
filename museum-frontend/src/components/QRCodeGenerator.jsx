@@ -10,7 +10,7 @@ const QRCodeGenerator = ({ imageId, onClose }) => {
     const fetchQRCode = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/images/${imageId}/qrcode`
+          `http://localhost:5000/api/images/qrcode/${imageId}`
         );
         setQrCode(response.data.qrCode); // Assuming the response contains the qrCode field
       } catch (error) {

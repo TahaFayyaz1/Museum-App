@@ -79,27 +79,36 @@ const generateQRCode = async (req, res) => {
   const db = req.db;
 
   try {
+    // Validate the provided ID
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid image ID" });
     }
 
+    // Fetch the image from the database to ensure it exists
     const image = await db
       .collection("images")
       .findOne({ _id: new ObjectId(id) });
+
     if (!image) {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    const qrCodeData = `http://localhost:5000/uploads/${image.photos[0].filename}`;
-    const qrCode = await QRCode.toDataURL(qrCodeData);
+    // Generate the link for the QR code
+    const link = `http://localhost:3000/item/${id}`;
+
+    // Generate a QR code containing the link
+    const qrCode = await QRCode.toDataURL(link);
+
     if (!qrCode) {
       return res.status(500).json({ error: "Failed to generate QR code" });
     }
 
+    // Save the QR code data (optional)
     await db
       .collection("images")
-      .updateOne({ _id: new ObjectId(id) }, { $set: { qrCodeData } });
+      .updateOne({ _id: new ObjectId(id) }, { $set: { qrCodeData: qrCode } });
 
+    // Respond with the QR code
     res.status(200).json({ qrCode });
   } catch (err) {
     console.error("Error generating QR code:", err);
@@ -154,10 +163,40 @@ const searchImages = async (req, res) => {
   }
 };
 
+// Get a specific image by ID
+const getImageById = async (req, res) => {
+  const { id } = req.params; // Get the image ID from the request parameters
+  const db = req.db; // Get the database instance from the request
+
+  try {
+    // Validate the provided ID
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid image ID" });
+    }
+
+    // Query the database for the image
+    const image = await db
+      .collection("images")
+      .findOne({ _id: new ObjectId(id) });
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    // Return the image data
+    res.status(200).json(image);
+  } catch (err) {
+    console.error("Error fetching image:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch image", details: err.message });
+  }
+};
+
 module.exports = {
   uploadImage,
   saveImage,
   generateQRCode,
   getAllImages,
   searchImages,
+  getImageById,
 };
